@@ -51,8 +51,8 @@ class DataConfiguration {
    */
   private val timeFormats = new TimeFormats(
     dateTimePattern = variable("url", "dateTimePattern"))
-  private val from: DateTime = timeFormats.timeFormats(dateString = variable("times", "endDate"))
-  private val until: DateTime = timeFormats.timeFormats(dateString = variable("times", "startDate"))
+  private val from: DateTime = timeFormats.timeFormats(dateString = variable("times", "startDate"))
+  private val until: DateTime = timeFormats.timeFormats(dateString = variable("times", "endDate"))
   new TimeBoundaries().timeBoundaries(from = from, until = until)
 
 
