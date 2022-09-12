@@ -1,14 +1,14 @@
 package com.grey
 
 import com.grey.configurations.DataConfiguration
-import com.grey.environment.{DataDirectories, LocalSettings}
+import com.grey.environment.{LocalDirectories, LocalSettings}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
 
 object FlowApp {
 
   private val localSettings = new LocalSettings()
-  private val dataDirectories = new DataDirectories()
+  private val localDirectories = new LocalDirectories()
 
   def main(args: Array[String]): Unit = {
 
@@ -30,9 +30,7 @@ object FlowApp {
 
 
     // Directories
-    List(localSettings.dataDirectory, localSettings.warehouseDirectory).par.map(
-      directory => dataDirectories.localDirectoryReset(directory)
-    )
+    localDirectories.localDirectoryReset(directoryName = localSettings.warehouseDirectory)
 
 
     // Data
