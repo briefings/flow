@@ -1,6 +1,6 @@
 package com.grey
 
-import com.grey.environment.{DataDirectories, LocalSettings}
+import com.grey.environment.{LocalDirectories, LocalSettings}
 import com.grey.functions.IsExistURL
 import org.joda.time.DateTime
 
@@ -15,7 +15,7 @@ import scala.util.control.Exception
 class ImportData(api: String, dateTimePattern: String) {
 
   private val localSettings = new LocalSettings()
-  private val dataDirectories = new DataDirectories()
+  private val localDirectories = new LocalDirectories()
   private val isExistURL = new IsExistURL()
 
   def importData(listOfDates: List[DateTime]): Unit = {
@@ -39,7 +39,7 @@ class ImportData(api: String, dateTimePattern: String) {
 
       // If yes, import the data set, otherwise ...
       val data: Try[String] = if (isURL.isSuccess) {
-        dataDirectories.localDirectoryCreate(directoryName = directory)
+        localDirectories.localDirectoryCreate(directoryName = directory)
         Exception.allCatch.withTry(
           new URL(url) #> new File(dataString) !!
         )
