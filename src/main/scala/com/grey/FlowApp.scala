@@ -35,8 +35,7 @@ object FlowApp {
 
     // Data
     val dataConfiguration: DataConfiguration = new DataConfiguration()
-    new ImportData(api = dataConfiguration.api, dateTimePattern = dataConfiguration.dateTimePattern)
-      .importData(listOfDates = dataConfiguration.listOfDates)
+    dataConfiguration.listOfDates.foreach(println(_))
 
   }
 
