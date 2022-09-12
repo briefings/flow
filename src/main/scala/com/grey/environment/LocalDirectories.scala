@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils
 import scala.util.Try
 import scala.util.control.Exception
 
-class DataDirectories {
+class LocalDirectories {
 
   // Reset
   def localDirectoryReset(directoryName: String): Try[Boolean] = {
