@@ -1,9 +1,11 @@
 package com.grey
 
-import com.grey.configurations.DataConfiguration
 import com.grey.environment.{LocalDirectories, LocalSettings}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
+
+import java.io.File
+import java.nio.file.Paths
 
 object FlowApp {
 
@@ -33,9 +35,15 @@ object FlowApp {
     localDirectories.localDirectoryReset(directoryName = localSettings.warehouseDirectory)
 
 
+    // Try
+    val directoryObject: File = new File(localSettings.dataDirectory)
+    val directories: Array[File] = directoryObject.listFiles.filter(_.isDirectory)
+    val dataStrings: Array[String] = directories.map(dir =>
+      dir.listFiles.filter(_.isFile).map(_.getPath)).reduce(_ union _)
+
+
     // Data
-    val dataConfiguration: DataConfiguration = new DataConfiguration()
-    dataConfiguration.listOfDates.foreach(println(_))
+    new Algorithms(spark = spark).algorithms(dataStrings = dataStrings)
 
   }
 
