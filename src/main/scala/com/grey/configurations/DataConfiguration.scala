@@ -75,6 +75,6 @@ class DataConfiguration {
    */
   val api: String = variable("url", "api")
   val sourceTimeStamp: String = variable("times", "sourceTimeStamp")
-
+  val dateTimePattern: String = variable("url", "dateTimePattern")
 
 }
