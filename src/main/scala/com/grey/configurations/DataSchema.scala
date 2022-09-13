@@ -9,10 +9,19 @@ import java.nio.file.Paths
 import scala.util.Try
 import scala.util.control.Exception
 
+
+/**
+ *
+ * @param spark: An instance of SparkSession
+ */
 class DataSchema(spark: SparkSession) {
 
   private val localSettings = new LocalSettings()
 
+  /**
+   *
+   * @return A data reading schema
+   */
   def dataSchema(): StructType = {
 
     // A data reading schema for the data set in question
