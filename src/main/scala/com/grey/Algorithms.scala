@@ -5,7 +5,7 @@ import com.grey.functions.ScalaCaseClass
 import org.apache.spark.sql.expressions.{Window, WindowSpec}
 import org.apache.spark.sql.types.DateType
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
-import org.apache.spark.sql.functions.count
+import org.apache.spark.sql.functions.{count, sum}
 import org.apache.spark.storage.StorageLevel
 
 
@@ -39,25 +39,42 @@ class Algorithms(spark: SparkSession) {
 
     dataStrings.par.foreach { dataString =>
 
+
       // A data set
       val readings: DataFrame = spark.read.schema(dataSchema.dataSchema()).json(dataString)
 
+
       // Adding field <start_date> - the start date.
       val addStarting: DataFrame = readings.withColumn(colName = "start_date", col = $"started_at".cast(DateType))
+
 
       // Using spark Dataset[]
       val baseline: Dataset[Row] = addStarting.as(
         ScalaCaseClass.scalaCaseClass(schema = addStarting.schema)).persist(StorageLevel.MEMORY_ONLY)
 
+
       // Examples
       baseline.groupBy($"start_date")
-        .agg(count("*").as("N")).orderBy($"start_date".asc_nulls_last).show()
+        .agg(count("*").as("daily_departures"))
+        .orderBy($"start_date".asc_nulls_last)
+        .show(5)
 
       baseline.groupBy($"start_station_id", $"start_date")
-        .agg(count("*").as("outward")).orderBy($"start_station_id", $"start_date".asc_nulls_last).show()
+        .agg(count("*").as("daily_station_departures"))
+        .orderBy($"start_station_id".asc_nulls_last, $"start_date".asc_nulls_last)
+        .show(5)
 
-      val outward = baseline.select($"start_station_id", $"start_date", count('*).over(windowSpec).as("N"))
-      outward.show()
+      baseline.select($"start_station_id", $"start_date")
+        .rollup($"start_station_id", $"start_date")
+        .agg(count("*").as("daily_station_departures"))
+        .orderBy($"start_station_id".asc_nulls_last, $"start_date".asc_nulls_last)
+        .show(5)
+
+      baseline.groupBy($"start_station_id", $"start_date")
+        .agg(count("*").as("outward"))
+        .select($"start_station_id", $"start_date",
+          sum($"outward").over(windowSpec).as("daily_station_departures_c"))
+        .show(5)
 
     }
 
