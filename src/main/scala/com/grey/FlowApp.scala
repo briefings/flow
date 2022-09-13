@@ -31,11 +31,11 @@ object FlowApp {
     spark.sparkContext.setLogLevel("ERROR")
 
 
-    // Directories
+    // Directories; empty the outputs directory
     localDirectories.localDirectoryReset(directoryName = localSettings.warehouseDirectory)
 
 
-    // Try
+    // The data files list; the data files reside in subdirectories of the data directory
     val directoryObject: File = new File(localSettings.dataDirectory)
     val directories: Array[File] = directoryObject.listFiles.filter(_.isDirectory)
     val dataStrings: Array[String] = directories.map(dir =>
