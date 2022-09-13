@@ -12,12 +12,22 @@ import scala.sys.process._
 import scala.util.Try
 import scala.util.control.Exception
 
+
+/**
+ *
+ * @param api: The API string of the data source
+ * @param dateTimePattern: The API string's data & time pattern
+ */
 class ImportData(api: String, dateTimePattern: String) {
 
   private val localSettings = new LocalSettings()
   private val localDirectories = new LocalDirectories()
   private val isExistURL = new IsExistURL()
 
+  /**
+   *
+   * @param listOfDates: A list of dates
+   */
   def importData(listOfDates: List[DateTime]): Unit = {
 
 
