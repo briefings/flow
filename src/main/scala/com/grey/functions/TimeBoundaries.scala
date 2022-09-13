@@ -5,8 +5,18 @@ import org.joda.time.DateTime
 import scala.util.Try
 import scala.util.control.Exception
 
+
+/**
+ * Validates the time boundaries for a time series
+ */
 class TimeBoundaries {
 
+  /**
+   *
+   * @param from: Starting
+   * @param until: Ending
+   * @return
+   */
   def timeBoundaries(from: DateTime, until: DateTime): Boolean = {
 
     // Set-up from & until comparison
