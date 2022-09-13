@@ -1,23 +1,65 @@
 package com.grey
 
-import com.grey.environment.LocalSettings
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import com.grey.configurations.DataSchema
+import com.grey.functions.ScalaCaseClass
+import org.apache.spark.sql.expressions.{Window, WindowSpec}
+import org.apache.spark.sql.types.DateType
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.functions.count
+import org.apache.spark.storage.StorageLevel
 
-import java.nio.file.Paths
 
+/**
+ *
+ * @param spark: An instance of SparkSession
+ */
 class Algorithms(spark: SparkSession) {
 
-  private val localSettings = new LocalSettings()
+  private val dataSchema = new DataSchema(spark = spark)
 
+  /**
+   *
+   * @param dataStrings: A list of a data set's Paths.get(path, file name + file extension) strings
+   */
   def algorithms(dataStrings: Array[String]): Unit = {
 
-    dataStrings.par.foreach{dataString =>
+    /**
+     * Import implicits for
+     * encoding (https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-sql-Encoder.html)
+     * implicit conversions, e.g., converting a RDD to a DataFrames.
+     * access to the "$" notation.
+     */
+    import spark.implicits._
 
-      val readings: DataFrame = spark.read.json(dataString)
-      readings.show(numRows = 5)
+
+    // A window calculation specification
+    val windowSpec: WindowSpec = Window.partitionBy($"start_station_id")
+      .orderBy($"start_date".asc_nulls_last)
+      .rowsBetween(Window.unboundedPreceding, Window.currentRow)
+
+    dataStrings.par.foreach { dataString =>
+
+      // A data set
+      val readings: DataFrame = spark.read.schema(dataSchema.dataSchema()).json(dataString)
+
+      // Adding field <start_date> - the start date.
+      val addStarting: DataFrame = readings.withColumn(colName = "start_date", col = $"started_at".cast(DateType))
+
+      // Using spark Dataset[]
+      val baseline: Dataset[Row] = addStarting.as(
+        ScalaCaseClass.scalaCaseClass(schema = addStarting.schema)).persist(StorageLevel.MEMORY_ONLY)
+
+      // Examples
+      baseline.groupBy($"start_date")
+        .agg(count("*").as("N")).orderBy($"start_date".asc_nulls_last).show()
+
+      baseline.groupBy($"start_station_id", $"start_date")
+        .agg(count("*").as("outward")).orderBy($"start_station_id", $"start_date".asc_nulls_last).show()
+
+      val outward = baseline.select($"start_station_id", $"start_date", count('*).over(windowSpec).as("N"))
+      outward.show()
 
     }
-
 
   }
 
