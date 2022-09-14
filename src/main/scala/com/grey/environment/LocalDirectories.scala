@@ -33,7 +33,7 @@ class LocalDirectories {
     // Create
     val create: Try[Boolean] = Exception.allCatch.withTry(
       if (!directoryObject.exists()) {
-        directoryObject.mkdir()
+        directoryObject.mkdirs()
       } else {
         true
       }
