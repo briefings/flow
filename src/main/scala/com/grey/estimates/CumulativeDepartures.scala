@@ -2,7 +2,8 @@ package com.grey.estimates
 
 import org.apache.spark.sql.expressions.{Window, WindowSpec}
 import org.apache.spark.sql.functions.{count, sum}
-import org.apache.spark.sql.{Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import com.grey.functions.ScalaCaseClass
 
 
 /**
@@ -31,13 +32,14 @@ class CumulativeDepartures(spark: SparkSession) {
    *
    * @param baseline: Data set
    */
-  def cumulativeDepartures(baseline: Dataset[Row]): Unit = {
+  def cumulativeDepartures(baseline: Dataset[Row]): Dataset[Row] = {
 
-    baseline.groupBy($"start_station_id", $"start_date")
+    val data: DataFrame = baseline.groupBy($"start_station_id", $"start_date")
       .agg(count("*").as("outward"))
       .select($"start_station_id", $"start_date",
         sum($"outward").over(windowSpec).as("daily_station_departures_c"))
-      .show(5)
+
+    data.as(ScalaCaseClass.scalaCaseClass(schema = data.schema))
 
   }
 
