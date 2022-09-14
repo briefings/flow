@@ -1,15 +1,14 @@
 package com.grey
 
-import com.grey.configurations.{DataConfiguration, DataSchema}
-import com.grey.environment.LocalSettings
+import com.grey.configurations.DataSchema
 import com.grey.estimates.CumulativeDepartures
+import com.grey.estimates.DailyStationDepartures
 import com.grey.functions.ScalaCaseClass
-import org.apache.commons.io.FilenameUtils
 import org.apache.spark.sql.types.DateType
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
-import java.nio.file.Paths
+import scala.collection.parallel.mutable.ParArray
 
 
 /**
@@ -19,9 +18,8 @@ import java.nio.file.Paths
 class Algorithms(spark: SparkSession) {
 
   private val dataSchema = new DataSchema(spark = spark)
+  private val dailyStationDepartures = new DailyStationDepartures(spark = spark)
   private val cumulativeDepartures = new CumulativeDepartures(spark = spark)
-  private val dataConfiguration = new DataConfiguration()
-  private val localSettings = new LocalSettings()
 
   /**
    *
@@ -38,7 +36,7 @@ class Algorithms(spark: SparkSession) {
     import spark.implicits._
 
 
-    dataStrings.par.foreach { dataString =>
+    val T: ParArray[Dataset[Row]] = dataStrings.par.map { dataString =>
 
 
       // A data set
@@ -56,28 +54,13 @@ class Algorithms(spark: SparkSession) {
 
 
       // Examples
+      dailyStationDepartures.dailyStationDepartures(baseline = baseline)
       cumulativeDepartures.cumulativeDepartures(baseline = baseline)
 
 
-      // Writing
-      println(FilenameUtils.getBaseName(Paths.get(dataString).getParent.toString))
-      println(FilenameUtils.getBaseName(dataString))
-
-
-      /*
-      Exception.allCatch.withTry(
-        baseline.coalesce(1).write
-          .option("header", value = true)
-          .option("encoding", value = "UTF-8")
-          .option("timestampFormat", value = dataConfiguration.sourceTimeStamp)
-          .option("dateFormat", value = "yyy-MM-dd")
-          .csv(path = Paths.get(localSettings.warehouseDirectory).toString)
-
-      )
-      */
-
-
     }
+
+    T.reduce(_ union _).show()
 
   }
 
