@@ -12,9 +12,9 @@ class LocalSettings {
   val dataDirectory: String = s"$projectDirectory${separator}data"
 
   // Warehouse directory
-  val warehouseDirectory: String = Paths.get(projectDirectory, "warehouse").toString + separator
+  val warehouseDirectory: String = Paths.get(projectDirectory, "warehouse").toString
 
   // Resources directory
-  val resourcesDirectory: String = Paths.get(projectDirectory, "src", "main", "resources").toString + separator
+  val resourcesDirectory: String = Paths.get(projectDirectory, "src", "main", "resources").toString
 
 }
