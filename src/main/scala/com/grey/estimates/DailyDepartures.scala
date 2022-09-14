@@ -6,7 +6,7 @@ import org.apache.spark.sql.functions.count
 
 class DailyDepartures(spark: SparkSession) {
 
-  def dailyDepartures(baseline: Dataset[Row]): Unit = {
+  def dailyDepartures(baseline: Dataset[Row]): Dataset[Row] = {
 
     /**
      * Import implicits for
@@ -19,7 +19,6 @@ class DailyDepartures(spark: SparkSession) {
     baseline.groupBy($"start_date")
       .agg(count("*").as("daily_departures"))
       .orderBy($"start_date".asc_nulls_last)
-      .show(5)
 
   }
 
